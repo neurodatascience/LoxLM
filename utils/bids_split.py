@@ -14,7 +14,9 @@ class BidsSplitter:
         self.src = src
         self.md_splitter = MarkdownTextSplitter()
         md_splits = self.crawl_specification(src,ignore)
+
         self.splits = self.md_splitter.create_documents(md_splits)
+        
   #      self.text_splitter = RecursiveCharacterTextSplitter(chunk_size = chunk_size, chunk_overlap = chunk_overlap)
   #      self.splits = self.text_splitter.split_documents(md_splits)
 

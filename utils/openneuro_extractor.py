@@ -24,12 +24,13 @@ suffix_endings = [f"{suffix}.json" for suffix in suffixes]
 # %%
 
 # %%
-data=pd.read_csv('openneuro.tsv',sep='\t')
+data=pd.read_csv('./utils/openneuro.tsv',sep='\t')
 
 # %%
 names = data['name']
-
-names_subset = names[25:100]
+start_index = 200
+end_index = 250
+names_subset = names[start_index:end_index]
 
 # %%
 
@@ -73,7 +74,7 @@ for name in names_subset:
     dic_temp = scan_dir(f"openneuro/{name}")
     dic.update(dic_temp)
     print(f"scanned - {name}")
-with open('descriptions_25-100.json', 'w') as f:
+with open(f'descriptions_{start_index}-{end_index}', 'w') as f:
     json.dump(dic, f)
 
     
