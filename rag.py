@@ -10,13 +10,13 @@ from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassThrough
+from langchain_core.runnables import RunnablePassthrough
 from langchain_core.example_selectors import SemanticSimilarityExampleSelector
 from langchain_core.prompts.few_shot import FewShotPromptTemplate
 from langchain_core.prompts.prompt import PromptTemplate
 
 from utils.bids_split import BidsSplitter
-from utils.pdf_split import PdfSPlitter
+from utils.pdf_split import PdfSplitter
 #Database Parameters
 print("Database Parameters")
 URI = 'http://localhost:19530'
@@ -33,7 +33,7 @@ bids_splits = bids_splitter.get_splits()
 pdf_splitter = PdfSplitter()
 pdf_splits = pdf_splitter.get_splits()
 
-all_context = pdf_splits + bids_splits
+all_context = bids_splits
 
 with open("examples.json","r") as f:
     examples = json.load(f)
@@ -50,7 +50,7 @@ print("Example Vector Store")
 #Vector Store Initialization
 #Examples
 example_store = m(
-    emedding_function = hf,
+    embedding_function = hf,
     connection_args = connection_args,
     collection_name = EXAMPLE_COLLECTION,
     drop_old = True,
@@ -65,7 +65,7 @@ example_selector = SemanticSimilarityExampleSelector.from_examples(
 #Context
 print("Context Store")
 context_store = m(
-    emedding_function = hf,
+    embedding_function = hf,
     connection_args = connection_args,
     collection_name = CONTEXT_COLLECTION,
     drop_old = True,
@@ -79,7 +79,7 @@ context_store = m(
 #ExamplePrompt
 
 example_prompt = PromptTemplate(
-    input_variables = ["SeriesDescription", "ProtocolName", "index"]
+    input_variables = ["SeriesDescription", "ProtocolName", "index"],
     template = """
         SeriesDescription: "{SeriesDescription}" \n ProtocolName: "{ProtocolName}"\n Suffix: "{index}"
     """
@@ -87,7 +87,7 @@ example_prompt = PromptTemplate(
 print(example_prompt)
 few_shot_prompt = FewShotPromptTemplate(
     example_selector = example_selector,
-    example_prompt = example_prompt
+    example_prompt = example_prompt,
     suffix = "SeriesDescription: {SeriesDescription} \n ProtocolName: {ProtocolName} \n what is the suffix?",
     input_variables = ["SeriesDescription", "ProtocalName"],
 )
@@ -95,7 +95,7 @@ print(few_shot_prompt)
 #Load LLM
 print("Load LLM")
 llm = Ollama(
-    model = "gemma:2b"
+    model = "gemma:2b",
     callback_manager = CallbackManager(
         [StreamingStdOutCallbackHandler()]
     ),
@@ -104,9 +104,9 @@ llm = Ollama(
 
 #Construct Prompt
 print("Retriever")
-retriever = vector_store.as_retriever()
+retriever = context_store.as_retriever()
 print("Rag Prompt")
-rag _prompt = ChatPromptTemplate.from_messages(
+rag_prompt = ChatPromptTemplate.from_messages(
     [
         ("system", "You are an expert in DICOM to BIDs conversion. You will be asked to provide the BIDs suffix for a given SeriesDescription and ProtocolName."),
         few_shot_prompt,
