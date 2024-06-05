@@ -15,7 +15,7 @@ from langchain_core.example_selectors import SemanticSimilarityExampleSelector
 from langchain_core.prompts.few_shot import FewShotPromptTemplate
 from langchain_core.prompts.prompt import PromptTemplate
 
-from utils/bids_split import BidsSplitter
+from utils.bids_split import BidsSplitter
 from utils.pdf_split import PdfSPlitter
 #Database Parameters
 print("Database Parameters")
