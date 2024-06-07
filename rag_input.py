@@ -126,7 +126,7 @@ print("Rag Prompt")
 
 final_prompt = ChatPromptTemplate.from_messages(
         [
-            SystemMessagePromptTemplate.from_template("You are an expert in DICOM to BIDs conversion. You will be asked to provide the BIDs suffix for a given SeriesDescription and ProtocolName. Use the following context from the bids specification to aid your answer: {context}\n Return a suffix from the following list (bold, T1w, T2w, dwi). Use the following examples to understand what to return and to use as reference about what to return."),
+        SystemMessagePromptTemplate.from_template("You are an expert in DICOM to BIDs conversion. You will be asked to provide the BIDs suffix for a given SeriesDescription and ProtocolName. Use the following context from the bids specification to aid your answer: {context}\n Return a suffix from the following list (bold, T1w, T2w, dwi). Use the following examples to understand what to return and to use as reference about what to return."),
         few_shot_prompt,
         HumanMessagePromptTemplate.from_template("{h}\n Suffix:"),
         ]
@@ -143,4 +143,20 @@ rag_chain = (
     | llm
 )
 
-print(rag_chain.invoke("SeriesDescription: dots_motion\nProtocolName: dots_motion"))
+def fields_to_string(fields: list[dict]):
+    return [(f"SeriesDescription: {field["SeriesDescription"]}\nProtocolName: {field["ProtocolName"]}",f"Suffix: {field["index"]}") for field in fields]
+
+with open("examples_test.json", "r") as f:
+    testers = json.load(f)
+testers = fields_to_string(testers)
+inputs = [test[0] for test in testers]
+outputs = [test[1] for test in testers]
+model_outputs = rag_chain.batch(inputs = inputs)
+
+outs = dict(zip(outputs,model_outputs))
+
+with open("model_outputs.json", "w") as f:
+    json.dump(outs,f)
+        
+
+
