@@ -40,7 +40,7 @@ pdf_splits = pdf_splitter.get_splits()
 
 all_context = bids_splits
 examples = []
-with open("examples.json","r") as f:
+with open("examples_clean.json","r") as f:
     examples2 = json.load(f)
     for example in examples2:
         series_description = example["SeriesDescription"]
@@ -113,17 +113,20 @@ llm = Ollama(
         [StreamingStdOutCallbackHandler()]
     ),
     stop = ["<|eot_id|>"],
+    temperature = 0.05,
+    top_k = 30,
+    top_p = 0.5,
 )
 
 #Construct Prompt
 print("Retriever")
-retriever = context_store.as_retriever()
+retriever = context_store.as_retriever(search_kwargs={'k':2,'fetch_k':10})
 print("Rag Prompt")
 
 
 final_prompt = ChatPromptTemplate.from_messages(
         [
-        SystemMessagePromptTemplate.from_template("You are an expert in DICOM to BIDs conversion. You will be asked to provide the BIDs suffix for a given SeriesDescription and ProtocolName. Use the following context to aid your answer: {context} \n Only return the relevant suffix, no other text is necessary. Use the following examples to understand what to return and to use as refreference about what to return."),
+            SystemMessagePromptTemplate.from_template("You are an expert in DICOM to BIDs conversion. You will be asked to provide the BIDs suffix for a given SeriesDescription and ProtocolName. Use the following context from the bids specification to aid your answer: {context}\n Return a suffix from the following list (bold, T1w, T2w, dwi). Use the following examples to understand what to return and to use as reference about what to return."),
         few_shot_prompt,
         HumanMessagePromptTemplate.from_template("{h}\n Suffix:"),
         ]
