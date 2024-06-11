@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "LoxLM"
+description = "LLM based DICOM to BIDS conversion aid."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { file = "LICENSE.txt" }
+authors = [{ name = "James Randolph", email = "jarandolph77@gmail.com" }]
+dynamic = ["version"]
+dependencies = ["llangchain", "llangchain_core", "llangchain_community"]
+
+[project.optional-dependencies]
+doc = [
+  "sphinx",
+  "sphinx-argparse",
+  "sphinx-copybutton",
+  "sphinx_rtd_theme",
+  "myst-parser",
+  "rstcheck",
+]
+test = ["pytest", "coverage[toml]"]
+docs = ["file_tree_check[doc]"]
+tests = ["file_tree_check[test]"]
+dev = ["file_tree_check[doc,test]"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["LoxLM"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "LoxLM/_version.py"
+
+[tool.pytest.ini_options]
+addopts = "-ra -vv"
+
+[tool.coverage.run]
+branch = true
+source = ["LoxLM/"]
+
+
+[tool.codespell]
+skip = "./.git,.mypy_cache,env,venv,tests,*bval,*bvec"
+
+[tool.black]
+line-length = 100
