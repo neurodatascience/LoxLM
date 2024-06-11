@@ -1,5 +1,6 @@
 import os
 import json
+import re
 
 from langchain_community.vectorstores import Milvus as m
 
@@ -19,6 +20,9 @@ from langchain_core.prompts.few_shot import FewShotPromptTemplate
 from langchain_core.prompts.few_shot import FewShotChatMessagePromptTemplate
 from langchain_core.prompts.chat import ChatPromptTemplate
 from langchain_core.prompts.chat import HumanMessagePromptTemplate
+
+from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.pydantic_v1 import BaseModel, Field, validator
 
 from utils.bids_split import BidsSplitter
 from utils.pdf_split import PdfSplitter
@@ -89,6 +93,21 @@ context_store = m(
     connection_args = connection_args
 )
 
+class MRI_Schema(BaseModel):
+    h: str = Field(description="DICOM SeriesDescription and Protocol Name input")
+    bot: str | list = Field(description="BIDs suffix cooresponding to DICOM")
+"""
+    @validator('h')
+    def complete_dicom_input(cls, field):
+        pattern = r'SeriesDescription: (.+?)(?:\n)?ProtocolName: (.+?)$'
+        match =  re.search(pattern, h)
+        if match:
+            series_description = match.group(1)
+            protocol_name = match.group(2)
+            return field
+        else:
+            raise ValueError("Improperly Formed Input")
+"""
 #ExamplePrompt
 
 example_prompt = ChatPromptTemplate.from_messages(
@@ -123,36 +142,43 @@ print("Retriever")
 retriever = context_store.as_retriever(search_kwargs={'k':2,'fetch_k':10})
 print("Rag Prompt")
 
+parser = PydanticOutputParser(pydantic_object = MRI_Schema)
 
 final_prompt = ChatPromptTemplate.from_messages(
         [
-        SystemMessagePromptTemplate.from_template("You are an expert in DICOM to BIDs conversion. You will be asked to provide the BIDs suffix for a given SeriesDescription and ProtocolName. Use the following context from the bids specification to aid your answer: {context}\n Return a suffix from the following list (bold, T1w, T2w, dwi). Use the following examples to understand what to return and to use as reference about what to return."),
+        SystemMessagePromptTemplate.from_template("You are an expert in DICOM to BIDs conversion. You will be asked to provide the BIDs suffix for a given SeriesDescription and ProtocolName. Use the following context from the bids specification to aid your answer: {context}\n Return a suffix from the following list (bold, T1w, T2w, dwi). Use the following examples to understand what to return.\n{format_instructions}\n"),
         few_shot_prompt,
         HumanMessagePromptTemplate.from_template("{h}\n Suffix:"),
         ]
-    )
-
+            )
+final_prompt = final_prompt.partial( format_instructions = parser.get_format_instructions(),)
 def format_docs(d):
     return str(d)
 
 rag_chain = (
-    {   "context": format_docs | retriever,
+    {   
+
+        "context": format_docs | retriever,
         "h": RunnablePassthrough(),
+
      }
     | final_prompt
     | llm
+    | parser
 )
 
 def fields_to_string(fields: list[dict]):
-    return [(f"SeriesDescription: {field["SeriesDescription"]}\nProtocolName: {field["ProtocolName"]}",f"Suffix: {field["index"]}") for field in fields]
+    return [(f"SeriesDescription: {field['SeriesDescription']}\nProtocolName: {field['ProtocolName']}",f"Suffix: {field['index']}") for field in fields]
 
-with open("examples_test.json", "r") as f:
+with open("examples_test_clean.json", "r") as f:
     testers = json.load(f)
 testers = fields_to_string(testers)
+testers = testers[:4]
 inputs = [test[0] for test in testers]
 outputs = [test[1] for test in testers]
 model_outputs = rag_chain.batch(inputs = inputs)
-
+print(model_outputs)
+print(outputs)
 outs = dict(zip(outputs,model_outputs))
 
 with open("model_outputs.json", "w") as f:
