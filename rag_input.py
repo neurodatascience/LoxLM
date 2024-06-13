@@ -1,8 +1,7 @@
 import os
 import json
 import re
-
-from langchain_community.vectorstores import Milvus as m
+from langchain_milvus.vectorstores import Milvus as m
 
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_community.llms import Ollama
@@ -94,7 +93,8 @@ context_store = m(
 )
 
 class MRI_Schema(BaseModel):
-    h: str = Field(description="DICOM SeriesDescription and Protocol Name input")
+    series_description: str = Field(description="The series description inputed by the user.")
+    protocol_name: str = Field(description="The protocol name inputed by the user.")
     bot: str | list = Field(description="BIDs suffix cooresponding to DICOM")
 """
     @validator('h')
@@ -133,8 +133,8 @@ llm = Ollama(
     ),
     stop = ["<|eot_id|>"],
     temperature = 0.05,
-    top_k = 30,
-    top_p = 0.5,
+    top_k = 15,
+    top_p = 0.2,
 )
 
 #Construct Prompt
@@ -173,16 +173,21 @@ def fields_to_string(fields: list[dict]):
 with open("examples_test_clean.json", "r") as f:
     testers = json.load(f)
 testers = fields_to_string(testers)
-testers = testers[:4]
+testers = testers[:20]
 inputs = [test[0] for test in testers]
 outputs = [test[1] for test in testers]
 model_outputs = rag_chain.batch(inputs = inputs)
 print(model_outputs)
 print(outputs)
-outs = dict(zip(outputs,model_outputs))
+combined = []
+for obj, x, y in zip(model_outputs, inputs, outputs):
+    obj_dict = obj.dict()
+    obj_dict['actual'] = y
+    obj_dict['input'] = x
+    combined.append(obj_dict)
 
 with open("model_outputs.json", "w") as f:
-    json.dump(outs,f)
+    json.dump(combined,f, indent=4)
         
 
 
