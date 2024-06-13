@@ -7,7 +7,7 @@ exclude =
     build,
     dist
 docstring-convention = numpy
-max-line-length = 100
+max-line-length = 120
 max_complexity = 15
 max_function_length = 100
 ignore = D100, D102, D103, D104, W503
