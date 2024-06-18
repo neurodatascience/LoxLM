@@ -21,11 +21,10 @@ from langchain_milvus.vectorstores import Milvus as m
 
 from utils.bids_split import BidsSplitter
 from utils.pdf_split import PdfSplitter
-
-# import os
-# import re
-# from langchain_core.runnables import RunnablePassthrough
-# from langchain_core.tools import tool
+import os
+import re
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.tools import tool
 
 # Database Parameters
 print("Database Parameters")
@@ -61,7 +60,7 @@ print("Embedding Model Load")
 # Embedding Model Initialization
 
 model_name = "BAAI/bge-small-en"
-model_kwargs = {"device": "cpu"}
+model_kwargs = {"device": "cuda"}
 encode_kwargs = {"normalize_embeddings": True}
 hf = HuggingFaceBgeEmbeddings(
     model_name=model_name, model_kwargs=model_kwargs, encode_kwargs=encode_kwargs
@@ -170,12 +169,13 @@ final_prompt = ChatPromptTemplate.from_messages(
 final_prompt = final_prompt.partial(
     format_instructions=parser.get_format_instructions(),
 )
+"""
 tools = [retriever_tool]
 agent = create_structured_chat_agent(llm, retriever_tool, final_prompt, parser)
 
 agent_executor = AgentExecutor(agent, tools, handle_parsing_errors=True)
-
-""" def format_docs(d):
+"""
+def format_docs(d):
     return str(d)
 
 rag_chain = (
@@ -189,7 +189,7 @@ rag_chain = (
     | llm
     | parser
 )
- """
+
 
 
 def fields_to_string(fields: list[dict]):
