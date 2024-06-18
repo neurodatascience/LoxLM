@@ -21,6 +21,7 @@ from langchain_milvus.vectorstores import Milvus as m
 
 from utils.bids_split import BidsSplitter
 from utils.pdf_split import PdfSplitter
+from utils.example_loader import ExampleLoader
 import os
 import re
 from langchain_core.runnables import RunnablePassthrough
@@ -43,18 +44,8 @@ pdf_splitter = PdfSplitter()
 pdf_splits = pdf_splitter.get_splits()
 
 all_context = bids_splits
-examples = []
-with open("examples_clean.json") as f:
-    examples2 = json.load(f)
-    for example in examples2:
-        series_description = example["SeriesDescription"]
-        protocol_name = example["ProtocolName"]
-        suffix = example["index"]
-        formatted = {
-            "h": f"SeriesDescription: {series_description}\nProtocolName: {protocol_name}",
-            "bot": f"Suffix: {suffix}",
-        }
-        examples.append(formatted)
+#Load Examples
+examples_test, examples_store = ExampleLoader()
 
 print("Embedding Model Load")
 # Embedding Model Initialization
@@ -76,7 +67,7 @@ example_store = m(
 )
 print("Example Selector")
 example_selector = SemanticSimilarityExampleSelector.from_examples(
-    examples,
+    examples_store,
     hf,
     example_store,
     k=5,
@@ -132,7 +123,7 @@ print(few_shot_prompt)
 # Load LLM
 print("Load LLM")
 llm = Ollama(
-    model="llama3",
+    model="gemma",
     callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
     stop=["<|eot_id|>"],
     temperature=0.05,
@@ -159,7 +150,7 @@ final_prompt = ChatPromptTemplate.from_messages(
             "You are an expert in DICOM to BIDs conversion."
             "You will be asked to provide the BIDs suffix for a given SeriesDescription and ProtocolName."
             "Use the following context from the bids specification to aid your answer: {context}"
-            "\n Return a suffix from the following list (bold, T1w, T2w, dwi)."
+            "\n Return a suffix from the BIDs specificatoin."
             "Use the following examples to understand what to return.\n{format_instructions}\n"
         ),
         few_shot_prompt,
@@ -192,23 +183,10 @@ rag_chain = (
 
 
 
-def fields_to_string(fields: list[dict]):
-    return [
-        (
-            f"SeriesDescription: {field['SeriesDescription']}\nProtocolName: {field['ProtocolName']}",
-            f"Suffix: {field['index']}",
-        )
-        for field in fields
-    ]
-
-
-with open("examples_test_clean.json") as f:
-    testers = json.load(f)
-testers = fields_to_string(testers)
-testers = testers[:20]
-inputs = [test[0] for test in testers]
-outputs = [test[1] for test in testers]
-model_outputs = agent_executor.abatch(inputs=inputs)
+examples_test = examples_test[:20]
+inputs = [test[0] for test in examples_test]
+outputs = [test[1] for test in examples_test]
+model_outputs = rag_chain.batch(inputs=inputs)
 print(model_outputs)
 print(outputs)
 combined = []
