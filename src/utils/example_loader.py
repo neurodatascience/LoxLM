@@ -1,6 +1,6 @@
 from pathlib import Path
 import json
-class ExampleLoader():
+class ExampleLoader:
     def __init__(self, test_split: float=.5, file: str | Path = "../examples_all.json",):
         try:
             with open(file) as f:
