@@ -5,7 +5,7 @@ from langchain_text_splitters import MarkdownTextSplitter
 class BidsSplitter:
 
     def __init__(self,
-                 src = "./bids-specification/src",
+                 src = "../bids-specification/src",
 
                  ignore = [],
                  chunk_size = 300,

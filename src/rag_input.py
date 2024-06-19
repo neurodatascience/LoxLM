@@ -45,7 +45,7 @@ pdf_splits = pdf_splitter.get_splits()
 
 all_context = bids_splits
 #Load Examples
-examples_test, examples_store = ExampleLoader()
+examples_test, examples_store = ExampleLoader().get_splits()
 
 print("Embedding Model Load")
 # Embedding Model Initialization
@@ -88,9 +88,9 @@ context_store = m(
 class MRI_Schema(BaseModel):
     """Schema for MRI data."""
 
-    series_description: str = Field(description="The series description inputted by the user.")
-    protocol_name: str = Field(description="The protocol name inputted by the user.")
-    bot: str | list = Field(description="BIDs suffix corresponding to DICOM")
+    series_description: str = Field(default="Not outputted",description="The series description inputted by the user.")
+    protocol_name: str = Field(default = "not outputted",description="The protocol name inputted by the user.")
+    bot: str | list = Field(default = "not outputted", description="BIDs suffix corresponding to the user's inputted DICOM fields.")
 
 
 """
@@ -126,7 +126,7 @@ llm = Ollama(
     model="gemma",
     callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
     stop=["<|eot_id|>"],
-    temperature=0.05,
+    temperature=0.00,
     top_k=15,
     top_p=0.2,
 )
@@ -183,10 +183,19 @@ rag_chain = (
 
 
 
-examples_test = examples_test[:20]
-inputs = [test[0] for test in examples_test]
-outputs = [test[1] for test in examples_test]
-model_outputs = rag_chain.batch(inputs=inputs)
+#examples_test = examples_test[:20]
+inputs = [test['h'] for test in examples_test]
+outputs = [test['bot'] for test in examples_test]
+inputs = inputs[200:400]
+model_outputs = rag_chain.batch(inputs)
+"""
+for input in inputs:
+    try:
+        out = rag_chain.invoke(input)
+        model_outputs.append(out)
+    except:
+        print(f"failed to return properly. Input: {input}")
+"""
 print(model_outputs)
 print(outputs)
 combined = []
@@ -196,5 +205,5 @@ for obj, x, y in zip(model_outputs, inputs, outputs):
     obj_dict["input"] = x
     combined.append(obj_dict)
 
-with open("model_outputs.json", "w") as f:
+with open("model_outputs_2.json", "w") as f:
     json.dump(combined, f, indent=4)
