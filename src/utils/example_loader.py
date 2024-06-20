@@ -1,3 +1,4 @@
+
 from pathlib import Path
 import json
 class ExampleLoader:
@@ -7,19 +8,22 @@ class ExampleLoader:
                 examples_all = json.load(f)
                 examples_all = [
                     {
-                        "h": f"SeriesDescription: {e['series_description']}\nProtocolName: {e['protocol_name']}",
-                        "bot": f"Suffix: {e['suffix']}"
+                        "h": f"SeriesDescription: {e['SeriesDescription']}\nProtocolName: {e['ProtocolName']}",
+                        "bot": f"Suffix: {e['index']}"
                         } 
                     for e in examples_all
                     ]
                 if not (0 < test_split < 1):
                     raise(ValueError("Split value most be between 0 and 1"))
-                examples_test = examples_all[:len(examples_all)*test_split]
-                examples_store = examples_all[len(examples_all)*test_split:]
-                return examples_test, examples_store
+                ind = int(len(examples_all)*test_split)
+                self.examples_test = examples_all[:ind]
+                self.examples_store = examples_all[ind:]
                 
         except FileNotFoundError:
-            print("File Not Found")
+            raise(FileNotFoundError("File Not Found"))
     
     def filter_types(self, types: list,):
         pass
+
+    def get_splits(self,):
+        return self.examples_test, self.examples_store

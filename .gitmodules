@@ -1,3 +1,6 @@
 [submodule "bids-specification"]
 	path = bids-specification
 	url = https://github.com/bids-standard/bids-specification.git
+[submodule "bids-schema"]
+	path = bids-schema
+	url = https://github.com/bids-standard/bids-schema.git
