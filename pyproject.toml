@@ -10,7 +10,7 @@ requires-python = ">=3.8"
 license = { file = "LICENSE.txt" }
 authors = [{ name = "James Randolph", email = "jarandolph77@gmail.com" }]
 dynamic = ["version"]
-dependencies = ["llangchain", "llangchain_core", "llangchain_community"]
+dependencies = ["langchain", "langchain_core", "langchain_community"]
 
 [project.optional-dependencies]
 doc = [
@@ -21,11 +21,6 @@ doc = [
   "myst-parser",
   "rstcheck",
 ]
-test = ["pytest", "coverage[toml]"]
-docs = ["file_tree_check[doc]"]
-tests = ["file_tree_check[test]"]
-dev = ["file_tree_check[doc,test]"]
-
 [tool.hatch.build.targets.wheel]
 packages = ["LoxLM"]
 
@@ -33,7 +28,7 @@ packages = ["LoxLM"]
 source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "LoxLM/_version.py"
+version-file = "_version.py"
 
 [tool.pytest.ini_options]
 addopts = "-ra -vv"
