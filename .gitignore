@@ -1,6 +1,6 @@
 volumes/*
 
-src/_version.py
+src/loxlm/_version.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
