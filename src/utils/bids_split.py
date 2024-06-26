@@ -60,4 +60,4 @@ class BidsSplitter:
     def get_splits(self):
         return self.splits
 
-    
+

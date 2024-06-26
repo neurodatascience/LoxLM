@@ -19,7 +19,7 @@ class ExampleLoader:
                             manufacturer = e['Manufacturer'],
                             model = e['ManufacturersModelName'],
                             )
-                    for e 
+                    for e
                     in examples_all
                     ]
                 if not (0 < test_split < 1):
@@ -27,10 +27,10 @@ class ExampleLoader:
                 ind = int(len(examples_all)*test_split)
                 self.examples_test = examples_all[:ind]
                 self.examples_store = examples_all[ind:]
-                
+
         except FileNotFoundError:
             raise(FileNotFoundError("File Not Found"))
-    
+
     def filter_types(self, types: list,):
         pass
 
