@@ -28,7 +28,7 @@ packages = ["LoxLM"]
 source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "_version.py"
+version-file = "src/_version.py"
 
 [tool.pytest.ini_options]
 addopts = "-ra -vv"
