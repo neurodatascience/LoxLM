@@ -1,8 +1,9 @@
 # %%
-import pandas as pd
-import os
 import json
+import os
 import subprocess
+
+import pandas as pd
 import yaml
 
 bids_suffix_path = "./bids-schema/versions/master/schema/objects/suffixes.yaml"

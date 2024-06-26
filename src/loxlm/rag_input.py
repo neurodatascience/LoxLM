@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import json
 
-from langchain.agents import AgentExecutor
-from langchain.agents import create_structured_chat_agent
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.tools.retriever import create_retriever_tool
@@ -11,21 +9,18 @@ from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_community.llms import Ollama
 from langchain_core.example_selectors import SemanticSimilarityExampleSelector
 from langchain_core.output_parsers import PydanticOutputParser
-from langchain_core.prompts.chat import ChatPromptTemplate
-from langchain_core.prompts.chat import HumanMessagePromptTemplate
-from langchain_core.prompts.chat import SystemMessagePromptTemplate
+from langchain_core.prompts.chat import (
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+    SystemMessagePromptTemplate,
+)
 from langchain_core.prompts.few_shot import FewShotChatMessagePromptTemplate
-from langchain_core.pydantic_v1 import BaseModel
-from langchain_core.pydantic_v1 import Field
-from langchain_milvus.vectorstores import Milvus as m
-
-from utils.bids_split import BidsSplitter
-from utils.pdf_split import PdfSplitter
-from utils.example_loader import ExampleLoader
-import os
-import re
+from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables import RunnablePassthrough
-from langchain_core.tools import tool
+from langchain_milvus.vectorstores import Milvus as m
+from utils.bids_split import BidsSplitter
+from utils.example_loader import ExampleLoader
+from utils.pdf_split import PdfSplitter
 
 # Database Parameters
 print("Database Parameters")

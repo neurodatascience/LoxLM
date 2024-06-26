@@ -1,6 +1,9 @@
-from .multi_example_selector import Example
-from pathlib import Path
 import json
+from pathlib import Path
+
+from loxlm.utils.multi_example_selector import Example
+
+
 class ExampleLoader:
     def __init__(self, test_split: float=.8, file: str | Path = "/home/rand/github/LoxLM/LoxLM/src/utils/example_loader.py",):
         try:

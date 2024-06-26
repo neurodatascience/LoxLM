@@ -1,13 +1,10 @@
-from langchain_core.example_selectors.base import BaseExampleSelector
-import statistics
 from abc import ABC, abstractmethod
-from sentence_transformers import SentenceTransformer
-from typing import Optional, Union
+
 import numpy as np
+from langchain_core.example_selectors.base import BaseExampleSelector
 from pydantic import BaseModel, validator
-import typing
-import scipy
-from sklearn import preprocessing
+from sentence_transformers import SentenceTransformer
+
 
 class Example(BaseModel):
         index: str

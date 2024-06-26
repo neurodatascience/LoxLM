@@ -1,22 +1,21 @@
-import os
+from __future__ import annotations
+
 import json
-
-from langchain_community.vectorstores import Milvus as m
-
-from langchain_community.embeddings import HuggingFaceBgeEmbeddings
-from langchain_community.llms import Ollama
+import os
 
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_community.llms import Ollama
+from langchain_community.vectorstores import Milvus as m
 from langchain_core.example_selectors import SemanticSimilarityExampleSelector
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.prompts.few_shot import FewShotPromptTemplate
 from langchain_core.prompts.prompt import PromptTemplate
-
+from langchain_core.runnables import RunnablePassthrough
 from utils.bids_split import BidsSplitter
 from utils.pdf_split import PdfSplitter
+
 #Database Parameters
 print("Database Parameters")
 URI = 'http://localhost:19530'
