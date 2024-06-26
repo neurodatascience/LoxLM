@@ -1,19 +1,16 @@
-from langchain_core.example_selectors.base import BaseExampleSelector
-import statistics
 from abc import ABC, abstractmethod
-from sentence_transformers import SentenceTransformer
-from typing import Optional, Union
+
 import numpy as np
+from langchain_core.example_selectors.base import BaseExampleSelector
 from pydantic import BaseModel, validator
-import typing
-import scipy
-from sklearn import preprocessing
+from sentence_transformers import SentenceTransformer
+
 
 class Example(BaseModel):
         index: str
         series_description: str
         protocol_name: str
-        task_name: str =  float('nan')        
+        task_name: str =  float('nan')
         repetition_time: float = float('nan')
         echo_time: float = float('nan')
         inversion_time: float = float('nan')
@@ -46,7 +43,7 @@ class BaseExampleRanker(ABC):
     def clean_examples(self, examples: list):
         return [example for example in examples if example is not None and
                 example != "NA" and example is not float('nan')]
-        
+
 
 class FloatExampleRanker(BaseExampleRanker):
     def __init__(self,examples: list):
@@ -98,7 +95,7 @@ class SemanticExampleRanker(BaseExampleRanker):
 
     def embed(self, examples):
         return self.model.encode(examples)
-    
+
 
 class MultiExampleSelector(BaseExampleSelector):
     def __init__(self, examples: [Example], k: int = None, model = SentenceTransformer("BAAI/bge-large-en-v1.5")):
@@ -142,6 +139,6 @@ class MultiExampleSelector(BaseExampleSelector):
         sorted_examples = sorted(example_dist, key =lambda x: x[1])
         print(sorted_examples[:10])
         return sorted_examples[:k]
-                
 
-        
+
+

@@ -1,8 +1,9 @@
 # %%
-import pandas as pd
-import os
 import json
+import os
 import subprocess
+
+import pandas as pd
 import yaml
 
 bids_suffix_path = "./bids-schema/versions/master/schema/objects/suffixes.yaml"
@@ -58,13 +59,13 @@ def scan_dir(path):
                         break
                 except:
                     print(f"Failed to load {root}/{file}")
-                
+
         dirs = [dir for dir in dirs if "." not in dir]
         for dir in dirs:
             little_dic = scan_dir(f"{root}/{dir}")
             dic.update(little_dic)
         return dic
-            
+
 
 # %%
 dic = {}
@@ -77,6 +78,6 @@ for name in names_subset:
 with open(f'descriptions_{start_index}-{end_index}', 'w') as f:
     json.dump(dic, f)
 
-    
+
 
 

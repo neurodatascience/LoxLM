@@ -1,6 +1,9 @@
-from .multi_example_selector import Example
-from pathlib import Path
 import json
+from pathlib import Path
+
+from loxlm.utils.multi_example_selector import Example
+
+
 class ExampleLoader:
     def __init__(self, test_split: float=.8, file: str | Path = "/home/rand/github/LoxLM/LoxLM/src/utils/example_loader.py",):
         try:
@@ -19,7 +22,7 @@ class ExampleLoader:
                             manufacturer = e['Manufacturer'],
                             model = e['ManufacturersModelName'],
                             )
-                    for e 
+                    for e
                     in examples_all
                     ]
                 if not (0 < test_split < 1):
@@ -27,10 +30,10 @@ class ExampleLoader:
                 ind = int(len(examples_all)*test_split)
                 self.examples_test = examples_all[:ind]
                 self.examples_store = examples_all[ind:]
-                
+
         except FileNotFoundError:
             raise(FileNotFoundError("File Not Found"))
-    
+
     def filter_types(self, types: list,):
         pass
 

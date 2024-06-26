@@ -1,11 +1,11 @@
-from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+import json
 
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_milvus.vectorstores import Milvus as m
 
-from .utils.bids_split import BidsSplitter
-from pdf_split import PdfSplitter
-from src.utils.example_loader import ExampleLoader
-import json
+from loxlm.utils.bids_split import BidsSplitter
+from loxlm.utils.example_loader import ExampleLoader
+from loxlm.utils.pdf_split import PdfSplitter
 
 URI = "http://localhost:19530"
 
@@ -57,7 +57,10 @@ inputs = inputs[:5]
 
 context = [format_docs(retriever.invoke(input)) for input in inputs]
 
-out = zip(inputs, context)
-data = json.dumps(out)
+combined = []
+for inputs, context in zip(inputs, context):
+    dic = {}
+    dic['input'], dic['context'] = inputs, context
+    combined.append(dic)
 with open("context_results.json",'w') as f:
-    f.write(data)
+    json.dump(combined,f,indent = 4)

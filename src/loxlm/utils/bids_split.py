@@ -1,10 +1,12 @@
 import os
 import re
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_text_splitters import MarkdownTextSplitter
+
 import nltk
-from nltk.tokenize import word_tokenize
+from langchain_text_splitters import (
+    MarkdownTextSplitter,
+)
 from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 
 nltk.download('stopwords')
 
@@ -60,4 +62,4 @@ class BidsSplitter:
     def get_splits(self):
         return self.splits
 
-    
+

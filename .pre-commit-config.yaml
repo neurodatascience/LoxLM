@@ -26,30 +26,25 @@ repos:
   hooks:
   - id: flynt
 
-- repo: https://github.com/asottile/reorder-python-imports
-  rev: v3.10.0
-  hooks:
-  - id: reorder-python-imports
-    args: [--py38-plus, --add-import, from __future__ import annotations]
-
-# - repo: https://github.com/pre-commit/mirrors-mypy
-#   rev: v1.3.0
-#   hooks:
-#   - id: mypy
-#     additional_dependencies: [types-all]
-#     files: bidspm
-#     args: [--config-file, setup.cfg]
-
-- repo: https://github.com/MarcoGorelli/auto-walrus
-  rev: v0.2.2
-  hooks:
-  - id: auto-walrus
+# Sorts Python imports alphabetically and by section with `isort`.
+-   repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+    -   id: isort
+        args: [--profile, black, --settings-path, pyproject.toml]
 
 - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
   rev: 0.2.3
   hooks:
   - id: yamlfmt
     args: [--mapping, '2', --sequence, '2', --offset, '0']
+
+# Format TOML files
+-   repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.13.0
+    hooks:
+    -   id: pretty-format-toml
+        args: [--autofix, --indent, '4']
 
 - repo: https://github.com/codespell-project/codespell
   rev: v2.2.5

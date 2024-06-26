@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import pytest
-from src.utils.multi_example_selector import (
-    BaseExampleRanker,
+from sentence_transformers import SentenceTransformer
+from loxlm.utils.multi_example_selector import (
     FloatExampleRanker,
     SemanticExampleRanker,
-    MultiExampleSelector,
 )
-from sentence_transformers import SentenceTransformer
+
 
 @pytest.fixture
 def model():
@@ -53,4 +54,3 @@ def test_eval_distance(float_ranker):
 
 def test_semantic_add_example(semantic_ranker):
     semantic_ranker.add_example("couch")
-
