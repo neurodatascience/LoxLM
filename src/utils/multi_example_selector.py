@@ -4,24 +4,36 @@ from abc import ABC, abstractmethod
 from sentence_transformers import SentenceTransformer
 from typing import Optional, Union
 import numpy as np
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 import typing
+import scipy
+from sklearn import preprocessing
 
 class Example(BaseModel):
+        index: str
         series_description: str
         protocol_name: str
-        task_name: str = None
-        repitition_time: float = None
-        echo_time: float = None
-        inversion_time: float = None
+        task_name: str =  float('nan')        
+        repetition_time: float = float('nan')
+        echo_time: float = float('nan')
+        inversion_time: float = float('nan')
         pulse_sequence_type: str = None
-        flip_angle: float = None
-
+        flip_angle: float = float('nan')
+        manufacturer: str = None
+        model: str = None
     #typing or whatever for an example class
 
+        @validator('repetition_time','echo_time','inversion_time','flip_angle',
+                pre=True, always=True)
+        def parse_float_na(cls,v):
+            if isinstance(v,float):
+                return float(v)
+            else:
+                return float('nan')
 class BaseExampleRanker(ABC):
     def __init__(self, examples: list):
-        self.examples = self.clean_examples(examples)
+        self.examples = examples
+        #self.clean_examples(examples)
 
     @abstractmethod
     def add_example(self, example):
@@ -32,7 +44,8 @@ class BaseExampleRanker(ABC):
         pass
 
     def clean_examples(self, examples: list):
-        return [example for example in examples if example is not None and examples != "NA"]
+        return [example for example in examples if example is not None and
+                example != "NA" and example is not float('nan')]
         
 
 class FloatExampleRanker(BaseExampleRanker):
@@ -41,19 +54,24 @@ class FloatExampleRanker(BaseExampleRanker):
 
 
     def add_example(self, example: float):
-        if example is not None and example != "NA":
+        if (example is not None and example != "NA" and example is not
+        float('nan')):
             self.examples.append(example)
+        else:
+            self.examples.append(np.nan)
 
 
     def eval_distance(self, val: float):
-        distances = [abs(val-example) for example in self.examples]
+        distances = [abs(val-example) if not np.isnan(example) else np.nan for example in self.examples]
         return self.normalize(distances)
 
     def normalize(self, values):
         min_val = min(values)
         max_val = max(values)
-        return [(x - min_val)/(max_val - min_val) for x in values]
-
+        if min_val == max_val:
+            return np.zeros_like(values)
+        else:
+            return [(val-min_val)/(max_val-min_val) for val in values]
 
 
 
@@ -67,9 +85,11 @@ class SemanticExampleRanker(BaseExampleRanker):
             self.embeddings = self.embed(self.examples)
 
     def add_example(self, example):
+        self.examples.append(example)
         if example is not None and example != "NA":
-            self.examples.append(example)
-            self.embeddings.append(self.model.encode([example])[0])
+             self.embeddings + self.model.encode([example])[0]
+        else:
+            self.embeddings +np.nan
 
     def eval_distance(self, example):
         query_embedding = self.model.encode([example])[0]
@@ -106,12 +126,11 @@ class MultiExampleSelector(BaseExampleSelector):
             if example.field is not None and example.field != "NA":
                 field_ranker.add_example(example)
 
-        #TODO: for all values of example that are floats update the mean and variance of examples
 
-    def select_examples(self, input: Example, k: int =1):
-        dist = np.ndarray()
-        for field, value in input.dict().items():
-            if value is not None and value != "NA":
+    def select_examples(self, input: Example, k: int =3):
+        dist = np.ndarray(shape=(1,len(self.examples)))
+        for field, value in input.model_dump().items():
+            if value is not None and value != "NA" and field !='index':
                 field_ranker = self.field_rankers[field]
                 distances = field_ranker.eval_distance(value)
                 distances = np.array(distances).reshape(1,-1)
@@ -121,6 +140,7 @@ class MultiExampleSelector(BaseExampleSelector):
         final_distances = final_distances / num_distances
         example_dist = zip(self.examples, final_distances.tolist())
         sorted_examples = sorted(example_dist, key =lambda x: x[1])
+        print(sorted_examples[:10])
         return sorted_examples[:k]
                 
 

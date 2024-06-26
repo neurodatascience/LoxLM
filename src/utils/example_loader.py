@@ -1,16 +1,26 @@
+from .multi_example_selector import Example
 from pathlib import Path
 import json
 class ExampleLoader:
-    def __init__(self, test_split: float=.5, file: str | Path = "../examples_all.json",):
+    def __init__(self, test_split: float=.8, file: str | Path = "/home/rand/github/LoxLM/LoxLM/src/utils/example_loader.py",):
         try:
             with open(file) as f:
                 examples_all = json.load(f)
                 examples_all = [
-                    {
-                        "h": f"SeriesDescription: {e['SeriesDescription']}\nProtocolName: {e['ProtocolName']}",
-                        "bot": f"Suffix: {e['index']}"
-                        } 
-                    for e in examples_all
+                    Example(index = e['index'],
+                            series_description = e['SeriesDescription'],
+                            protocol_name = e['ProtocolName'],
+                            task_name = e['TaskName'],
+                            reptition_time = e['RepetitionTime'],
+                            echo_time = e['EchoTime'],
+                            inversion_time = e['InversionTime'],
+                            pulse_sequence_type = e['PulseSequenceType'],
+                            flip_angle = e['FlipAngle'],
+                            manufacturer = e['Manufacturer'],
+                            model = e['ManufacturersModelName'],
+                            )
+                    for e 
+                    in examples_all
                     ]
                 if not (0 < test_split < 1):
                     raise(ValueError("Split value most be between 0 and 1"))

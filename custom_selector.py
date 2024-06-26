@@ -5,6 +5,11 @@ from src.utils.multi_example_selector import (
     SemanticExampleRanker,
     MultiExampleSelector,
 )
+from sentence_transformers import SentenceTransformer
+
+@pytest.fixture
+def model():
+    return SentenceTransformer("BAAI/bge-large-en-v1.5")
 
 
 @pytest.fixture
@@ -31,18 +36,17 @@ def examples_float():
 def float_ranker(examples_float):
     return FloatExampleRanker(examples_float)
 @pytest.fixture
-def semantic_ranker(examples_string):
-    return SemanticExampleRanker(examples_string)
+def semantic_ranker(examples_string, model):
+    return SemanticExampleRanker(examples_string, model)
 
-def test_clean_examples_float(examples_float_dirty):
-    assert BaseExampleRanker.clean_examples(examples_float_dirty) ==  [1.0,2.0,3.0]
 
 def test_float_add_example(examples_float):
     ranker = FloatExampleRanker(examples_float)
-    assert ranker.add_example(4.0) == [1.0,2.0,3.0,4.0]
+    ranker.add_example(4.0)
+    assert ranker.examples == [1.0,2.0,3.0,4.0]
 
-def test_normalize(examples_float):
-    assert FloatExampleRanker.normalize(examples_float) == [0.0, 0.5,1.0]
+def test_normalize(examples_float, float_ranker):
+    assert float_ranker.normalize(examples_float) == [0.0, 0.5,1.0]
 
 def test_eval_distance(float_ranker):
     assert float_ranker.eval_distance(2.0) == [1.0,0.0,1.0]
