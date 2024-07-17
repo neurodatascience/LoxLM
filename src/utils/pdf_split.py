@@ -3,7 +3,11 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 class PdfSplitter:
-
+    """
+    Crawls through all pdf documents in pdf folder. 
+        Splits them in to chunks. Returns splits through 
+        get splits function.
+        """
     def __init__(self,
                  src = "./pdfs",
                  chunk_size = 300,

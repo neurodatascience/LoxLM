@@ -1,15 +1,21 @@
-# %%
+
 import pandas as pd
 import os
 import json
 import subprocess
 import yaml
 
+"""
+Script to scrape DICOM data from json sidecars in openneuro collection.
+Uses datalad to download the datasets and scrape the metadata.
+Writes to a json file called 'descriptions_start and end index of collection.
+"""
+
 bids_suffix_path = "./bids-schema/versions/master/schema/objects/suffixes.yaml"
 
 
 
-# %%
+
 suffixes = []
 with open(bids_suffix_path) as f:
     bids_suffix = yaml.load(f, Loader=yaml.FullLoader)
@@ -18,23 +24,18 @@ with open(bids_suffix_path) as f:
 
 
 
-# %%
+
 suffix_endings = [f"{suffix}.json" for suffix in suffixes]
 
-# %%
 
-# %%
 data=pd.read_csv('./src/utils/openneuro.tsv',sep='\t')
 
-# %%
+
 names = data['name']
 start_index = 0
 end_index = len(names)
 names_subset = names[start_index:end_index]
 
-# %%
-
-# %%
 def scan_dir(path):
     for root, dirs, files in os.walk(path):
         encodings = ['UTF-8', 'utf-8-sig']
@@ -64,6 +65,7 @@ def scan_dir(path):
                         mo = d["ManufacturersModelName"] if "ManufacturersModelName" in d else "NA"
                         tn = d["TaskName"] if "TaskName" in d else "NA"
                         dic[file] = { "SeriesDescription" : sd,
+                                       "TaskName": tn,
                                        "ProtocolName" : pn,
                                        "RepetitionTime": rt,
                                        "EchoTime": et,
@@ -83,7 +85,7 @@ def scan_dir(path):
         return dic
             
 
-# %%
+
 dic = {}
 for name in names:
     subprocess.run(["datalad", "install","-d","openneuro",f"openneuro/{name}"])
@@ -91,7 +93,7 @@ for name in names:
     dic_temp = scan_dir(f"openneuro/{name}")
     dic.update(dic_temp)
     print(f"scanned - {name}")
-with open(f'descriptions_{start_index}-{end_index}', 'w') as f:
+with open(f'descriptions_{start_index}-{end_index}.json', 'w') as f:
     json.dump(dic, f)
 
     
