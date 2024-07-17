@@ -1,6 +1,7 @@
 from utils.multi_example_selector import MultiExampleSelector, Example
 from utils.example_loader import ExampleLoader
 from utils.prompt_logger import PromptLogger
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_core.prompts.few_shot import FewShotChatMessagePromptTemplate
 from langchain_core.prompts.chat import ChatPromptTemplate
@@ -32,17 +33,21 @@ examples_test, examples_store = el.get_splits(randomize = True)
 
 
 #Create embedding model
+
 model_name = "sentence-transformers/distiluse-base-multilingual-cased-v2"
 model_kwargs = {'device': 'cuda'}
 encode_kwargs = {'normalize_embeddings': True}
-model = SentenceTransformer(model_name)
+model = SentenceTransformer(model_name) 
+
+
+#model = OpenAIEmbeddings(model = "text-embedding-3-small")
 
 #hf = HuggingFaceBgeEmbeddings(
 #       model_name=model_name, model_kwargs=model_kwargs, encode_kwargs=encode_kwargs
 #)
 
 #Instantiate Example Selector
-examples_selector = MultiExampleSelector(examples = examples_store, k=50, model= model)
+examples_selector = MultiExampleSelector(examples = examples_store, k=30, model= model)
 
 
 # Load LLM
@@ -142,12 +147,13 @@ def rag_chain(example):
 #prompt logger writes saved prompts into a text file
 
 #Takes subset of test examples
-#examples_test = examples_test[]
+#examples_test = examples_test[:20]
 #Dumps dictionary from the Example Pydantic Objects
 examples = [example.model_dump() for example in examples_test]
 #Removes and stores the ground truth suffix value
 Y_true = [example.pop("suffix") for example in examples]
 #Runs a batch of example inputs
+print("batch chain")
 model_outputs = rag_chain.batch(examples)
 prompt_logger.write_logs()
 

@@ -3,6 +3,7 @@ from langchain_core.example_selectors.base import BaseExampleSelector
 import statistics
 from abc import ABC, abstractmethod
 from sentence_transformers import SentenceTransformer
+from langchain_openai import OpenAIEmbeddings
 from typing import Optional, Union
 import numpy as np
 from pydantic import BaseModel, validator, Field
@@ -104,30 +105,48 @@ class SemanticExampleRanker(BaseExampleRanker):
         vector embeddings of a list of example strings. It then
         is used to calculate distance between each of these vectors
         and an inputted string.
+
+        Model is either sentence transformer or OpenAIEmbedding
     """
     def __init__(self, examples: list, model):
         super().__init__(examples)
+
+        self.openai = isinstance(model,OpenAIEmbeddings)
+            
+        
         self.model = model
         if not self.examples:
-            self.embeddings = []
+            self.embeddings = np.array()
         else:
             self.embeddings = self.embed(self.examples)
 
     def add_example(self, example):
         self.examples.append(example)
         if example is not None and example != "NA":
-             self.embeddings + self.model.encode([example])[0]
+            if self.openai:
+                self.embeddings + self.model.embed_query(example)
+            else:
+                self.embeddings + self.model.encode([example])[0]
         else:
             self.embeddings +np.nan
 
     def eval_distance(self, example):
-        query_embedding = self.model.encode([example])[0]
-        distances = self.model.similarity([query_embedding],self.embeddings)
-        distances = distances[0]
-        return self.normalize(distances.numpy())
+        if self.openai:
+            query_embedding = self.model.embed_query(example)
+            distances = np.dot([query_embedding],np.array(self.embeddings).T)
+            #print(distances[1])
+            return self.normalize(distances[0])
+        else:
+            query_embedding = self.model.encode([example])[0]
+            distances = self.model.similarity([query_embedding],self.embeddings)
+            distances = distances[0]
+            return self.normalize(distances.numpy())
 
     def embed(self, examples):
-        return self.model.encode(examples)
+        if self.openai:
+            return self.model.embed_documents(examples)
+        else:
+            return self.model.encode(examples)
     
     def normalize(self, values):
         min_val = np.min(values)
