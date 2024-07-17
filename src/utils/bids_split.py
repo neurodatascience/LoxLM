@@ -16,7 +16,7 @@ class BidsSplitter:
 
                  ignore = ['README.md','CHANGES.md','extensions.md','licenses.md',
                      'contributors.md'],
-                 chunk_size = 120,
+                 chunk_size = 100,
                  chunk_overlap = 15,
                  ):
         self.src = src
@@ -34,7 +34,7 @@ class BidsSplitter:
         for root, dirs, files in os.walk(src):
             files = [file for file in files if (file.endswith(".md") and file
                 not in ignore)]
-            print(files)
+            #print(files)
             for file in files:
                 with open(f"{root}/{file}") as f:
                     text = f.read()

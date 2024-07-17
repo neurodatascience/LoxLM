@@ -24,12 +24,12 @@ suffix_endings = [f"{suffix}.json" for suffix in suffixes]
 # %%
 
 # %%
-data=pd.read_csv('./utils/openneuro.tsv',sep='\t')
+data=pd.read_csv('./src/utils/openneuro.tsv',sep='\t')
 
 # %%
 names = data['name']
-start_index = 200
-end_index = 250
+start_index = 0
+end_index = len(names)
 names_subset = names[start_index:end_index]
 
 # %%
@@ -54,7 +54,24 @@ def scan_dir(path):
                             pn = d["ProtocolName"]
                         else:
                             pn = "NA"
-                        dic[file] = { "SeriesDescription" : sd,  "ProtocolName" : pn}
+                        tn = d["TaskName"] if "TaskName" in d else "NA"
+                        rt = d["RepetitionTime"] if "RepetitionTime" in d else "NA"
+                        et = d["EchoTime"] if "EchoTime" in d else "NA"
+                        it = d["InversionTime"] if "InversionTime" in d else "NA"
+                        pst = d["PulseSequenceType"] if "PulseSequenceType" in d else "NA"
+                        fa = d["FlipAngle"] if "FlipAngle" in d else "NA"
+                        m = d["Manufacturer"] if "Manufacturer" in d else "NA"
+                        mo = d["ManufacturersModelName"] if "ManufacturersModelName" in d else "NA"
+                        tn = d["TaskName"] if "TaskName" in d else "NA"
+                        dic[file] = { "SeriesDescription" : sd,
+                                       "ProtocolName" : pn,
+                                       "RepetitionTime": rt,
+                                       "EchoTime": et,
+                                       "InversionTime": it,
+                                       "PulseSequenceType": pst,
+                                       "FlipAngle": fa,
+                                       "Manufacturer": m,
+                                       "ManufacturersModelName": mo,}
                         break
                 except:
                     print(f"Failed to load {root}/{file}")
@@ -68,7 +85,7 @@ def scan_dir(path):
 
 # %%
 dic = {}
-for name in names_subset:
+for name in names:
     subprocess.run(["datalad", "install","-d","openneuro",f"openneuro/{name}"])
     print(f"installed - {name}")
     dic_temp = scan_dir(f"openneuro/{name}")
