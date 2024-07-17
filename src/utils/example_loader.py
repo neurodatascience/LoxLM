@@ -4,7 +4,33 @@ import json
 import random
 
 class ExampleLoader:
-    def __init__(self, test_split: float=.4, file: str | Path = "./examples_simple.json", tokenize:bool = False, keys: list = None, expand: bool = False, expand_dict: dict = None):
+    """Class loads examples from a json file. Processes these examples
+        and returns them into two splits for storing and testing.
+        
+        Paramaters
+        ---------- 
+        test_split: float
+        The proportion of examples to be returned in test split. The remainder is returned
+        in the storage split.
+        
+        file: str | Path
+        The file to read examples from.
+        
+        tokenize: bool
+        Whether or not break up single word strings into more spaces. Useful when
+        characterstics are in snake or camel case rather than space seperated.
+        
+        keys: dict
+        The example keys to tokenize. Used together with tokenize parameter. Both are necessary
+        for this functionality to execute."""
+    def __init__(self,
+                 test_split: float=.4,
+                 file: str | Path = "./examples_simple.json",
+                 tokenize:bool = False,
+                 keys: list = None,
+                 expand: bool = False,
+                 expand_dict: dict = None,
+                 ):
         try:
             with open(file) as f:
                 examples_dics = json.load(f)
@@ -79,6 +105,15 @@ class ExampleLoader:
         raise NotImplementedError("exapnd from dict is not implemented")
 
     def get_splits(self, randomize: bool = False, test_split: float | None = None):
+        """
+        Returns a test and storage split.
+        
+        randomize: bool
+        If true shuffles dataset.
+        
+        test_split: float | None
+        Specifies proportion of examples to return in test split. Overrides __ini__ parameter."""
+        
         if randomize:
             random.shuffle(self.examples_all)
         if test_split is None:

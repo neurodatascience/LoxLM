@@ -10,6 +10,7 @@ nltk.download('stopwords')
 
 nltk.download('punkt')
 class BidsSplitter:
+    """Object that parses the bids specification and creates splits."""
 
     def __init__(self,
                  src = "../bids-specification/src",

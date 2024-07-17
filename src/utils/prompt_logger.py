@@ -3,6 +3,11 @@ from pathlib import Path
 from langchain_core.prompt_values import PromptValue
 
 class PromptLogger:
+    """Class to save prompts and write them to a text file.
+    
+        file: str
+            Address of text file to be written.
+    """
     def __init__(self, file: str = "./prompt_logs.txt"):
         self.file = file
         self.prompts = []

@@ -24,7 +24,7 @@ class Example(BaseModel):
         flip_angle: float = Field(default = float('nan'), description = "DICOM field for flip angle. Inputted by user.")
         manufacturer: str = Field(default = "NA", description = "DICOM field for scanner manufacturer. Inputted by user.") 
         model: str = Field(default = "NA", description = "DICOM field for scanner model. Inputted by user.") 
-    #typing or whatever for an example class
+
 
         @validator('repetition_time','echo_time','inversion_time','flip_angle',
                 pre=True, always=True)
@@ -40,7 +40,9 @@ class Example(BaseModel):
                 return str(v)
             else:
                 return str("NA")
+            
 class BaseExampleRanker(ABC):
+    """Abstract Example Ranker class."""
     def __init__(self, examples: list):
         self.examples = examples
         #self.clean_examples(examples)
@@ -59,6 +61,12 @@ class BaseExampleRanker(ABC):
         
 
 class FloatExampleRanker(BaseExampleRanker):
+    """
+        Example Ranker class for float data.
+        Stores an array of floats in order of examples.
+        Used to compare distance between each of the stored examples and 
+        a value inputted to eval_distance.
+    """
     def __init__(self,examples: list):
         #self.examples = np.log(np.array(examples))
         self.examples = np.array(examples)
@@ -89,6 +97,13 @@ class FloatExampleRanker(BaseExampleRanker):
 
 
 class SemanticExampleRanker(BaseExampleRanker):
+    """
+        Example Ranker for string data.
+        Similar to float example ranker, this class stores the 
+        vector embeddings of a list of example strings. It then
+        is used to calculate distance between each of these vectors
+        and an inputted string.
+    """
     def __init__(self, examples: list, model):
         super().__init__(examples)
         self.model = model
@@ -122,6 +137,10 @@ class SemanticExampleRanker(BaseExampleRanker):
             return (values-min_val)/(max_val-min_val) 
 
 class MultiExampleSelector(BaseExampleSelector):
+    """
+    This class combines semantic and float example rankers. It is used to select
+    the 'k' nearest stored examples to an input query.
+    """
     def __init__(self, model, examples: [Example], k: int = None, ):
         self.examples = examples
         self.k = k
@@ -149,6 +168,21 @@ class MultiExampleSelector(BaseExampleSelector):
 
 
     def select_examples(self, input: Example, weights: dict | None = None, k: int =3):
+        """
+            Returns the k examples with smalled distance to input Example.
+
+        Parameters
+        -----------
+        input: Example
+            The example that is we are trying to find other examples similar too.
+        
+        weights: dict
+            A dictionary with keys cooresponding to keys in the Example class. The values should be floats.
+            This is used to weight some fields more strongly than others.
+
+        k: int
+            The number of examples to return
+        """
         if isinstance(input,dict):
             input = Example.construct(**input)
         dist = np.zeros(shape=(0,len(self.examples)))
@@ -175,6 +209,7 @@ class MultiExampleSelector(BaseExampleSelector):
         return exs
                 
     def plot(self, data):
+        """Used to visualize distribution of distances."""
         num_rows, num_cols = data.shape
         fig, axs = plt.subplots(num_rows, 1, figsize=(8, 2*num_rows))  # Adjust figsize as needed
 
@@ -188,5 +223,3 @@ class MultiExampleSelector(BaseExampleSelector):
         plt.tight_layout()  # Optional: Adjust layout
         plt.show()
 
-    def plot_covariance(self):
-        import seaborn as sns
