@@ -27,10 +27,15 @@ os.environ["OPENAI_API_KEY"] = getpass.getpass()
 #Fields to expand 
 tokenize_keys = ['SeriesDescription', 'ProtocolName']
 #Instantiate ExampleLoader
-el = ExampleLoader(file = "./utils/examples_simple.json", tokenize= True, keys = tokenize_keys)
+store = ExampleLoader(file = "./utils/examples_simple.json", tokenize= True, keys = tokenize_keys)
 #Grab splits for testing and storage form ExampleLoader
-examples_test, examples_store = el.get_splits(randomize = True)
-
+examples_test, examples_store = store.get_splits(randomize = True)
+#for loading acutal dicoms
+"""
+_, examples_store = store.get_splits(randomize = True, test_split = 0)
+dicoms = ExampleLoader(file = "./input_dicoms.json", tokenize = True, keys = tokenize_keys, test_split =1)
+examples_test, _ = dicoms.get_splits()
+"""
 
 #Create embedding model
 
@@ -47,7 +52,7 @@ model = SentenceTransformer(model_name)
 #)
 
 #Instantiate Example Selector
-examples_selector = MultiExampleSelector(examples = examples_store, k=30, model= model)
+examples_selector = MultiExampleSelector(examples = examples_store, k=20, model= model)
 
 
 # Load LLM
