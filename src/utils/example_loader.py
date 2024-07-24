@@ -31,16 +31,19 @@ class ExampleLoader:
                  expand: bool = False,
                  expand_dict: dict = None,
                  ):
+        if not (0 <= test_split <= 1):
+            raise(ValueError("Split value most be between 0 and 1"))
         try:
             with open(file) as f:
                 examples_dics = json.load(f)
                 if tokenize and keys is not None:
                     self.tokenize_examples(examples = examples_dics, keys = keys, expand = expand, expand_dict= expand_dict)
-                self.examples_all = [
-                    Example(suffix = e['index'],
+                if test_split >= 1:
+                    self.examples_all = [
+                    Example(suffix = "NA",
                             series_description = e['SeriesDescription'],
                             protocol_name = e['ProtocolName'],
-                           # task_name = e['TaskName'],
+                            task_name = e['TaskName'],
                             reptition_time = e['RepetitionTime'],
                             echo_time = e['EchoTime'],
                             inversion_time = e['InversionTime'],
@@ -51,9 +54,25 @@ class ExampleLoader:
                     )
                     for e 
                     in examples_dics
-                    ]
-                if not (0 < test_split < 1):
-                    raise(ValueError("Split value most be between 0 and 1"))
+                    ]   
+                else:                 
+                    self.examples_all = [
+                        Example(suffix = e['index'],
+                                series_description = e['SeriesDescription'],
+                                protocol_name = e['ProtocolName'],
+                            # task_name = e['TaskName'],
+                                reptition_time = e['RepetitionTime'],
+                                echo_time = e['EchoTime'],
+                                inversion_time = e['InversionTime'],
+                                pulse_sequence_type = e['PulseSequenceType'],
+                                flip_angle = e['FlipAngle'],
+                                manufacturer = e['Manufacturer'],
+                                model = e['ManufacturersModelName'],
+                        )
+                        for e 
+                        in examples_dics
+                        ]
+
                 self.test_split = test_split               
         except FileNotFoundError:
             raise(FileNotFoundError("File Not Found"))
