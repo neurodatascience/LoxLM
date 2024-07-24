@@ -1,8 +1,10 @@
+from __future__ import annotations
+
+import json
+import os
+import subprocess
 
 import pandas as pd
-import os
-import json
-import subprocess
 import yaml
 
 """
@@ -14,8 +16,6 @@ Writes to a json file called 'descriptions_start and end index of collection.
 bids_suffix_path = "./bids-schema/versions/master/schema/objects/suffixes.yaml"
 
 
-
-
 suffixes = []
 with open(bids_suffix_path) as f:
     bids_suffix = yaml.load(f, Loader=yaml.FullLoader)
@@ -23,22 +23,21 @@ with open(bids_suffix_path) as f:
         suffixes.append(suffix)
 
 
-
-
 suffix_endings = [f"{suffix}.json" for suffix in suffixes]
 
 
-data=pd.read_csv('./src/utils/openneuro.tsv',sep='\t')
+data = pd.read_csv("./src/utils/openneuro.tsv", sep="\t")
 
 
-names = data['name']
+names = data["name"]
 start_index = 0
 end_index = len(names)
 names_subset = names[start_index:end_index]
 
+
 def scan_dir(path):
     for root, dirs, files in os.walk(path):
-        encodings = ['UTF-8', 'utf-8-sig']
+        encodings = ["UTF-8", "utf-8-sig"]
         dic = {}
         files = [file for file in files if file.endswith(tuple(suffix_endings))]
         for file in files:
@@ -64,38 +63,35 @@ def scan_dir(path):
                         m = d["Manufacturer"] if "Manufacturer" in d else "NA"
                         mo = d["ManufacturersModelName"] if "ManufacturersModelName" in d else "NA"
                         tn = d["TaskName"] if "TaskName" in d else "NA"
-                        dic[file] = { "SeriesDescription" : sd,
-                                       "TaskName": tn,
-                                       "ProtocolName" : pn,
-                                       "RepetitionTime": rt,
-                                       "EchoTime": et,
-                                       "InversionTime": it,
-                                       "PulseSequenceType": pst,
-                                       "FlipAngle": fa,
-                                       "Manufacturer": m,
-                                       "ManufacturersModelName": mo,}
+                        dic[file] = {
+                            "SeriesDescription": sd,
+                            "TaskName": tn,
+                            "ProtocolName": pn,
+                            "RepetitionTime": rt,
+                            "EchoTime": et,
+                            "InversionTime": it,
+                            "PulseSequenceType": pst,
+                            "FlipAngle": fa,
+                            "Manufacturer": m,
+                            "ManufacturersModelName": mo,
+                        }
                         break
-                except:
+                except Exception:
                     print(f"Failed to load {root}/{file}")
-                
+
         dirs = [dir for dir in dirs if "." not in dir]
         for dir in dirs:
             little_dic = scan_dir(f"{root}/{dir}")
             dic.update(little_dic)
         return dic
-            
 
 
 dic = {}
 for name in names:
-    subprocess.run(["datalad", "install","-d","openneuro",f"openneuro/{name}"])
+    subprocess.run(["datalad", "install", "-d", "openneuro", f"openneuro/{name}"])
     print(f"installed - {name}")
     dic_temp = scan_dir(f"openneuro/{name}")
     dic.update(dic_temp)
     print(f"scanned - {name}")
-with open(f'descriptions_{start_index}-{end_index}.json', 'w') as f:
+with open(f"descriptions_{start_index}-{end_index}.json", "w") as f:
     json.dump(dic, f)
-
-    
-
-
