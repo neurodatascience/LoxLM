@@ -10,7 +10,7 @@ requires-python = ">=3.8"
 license = { file = "LICENSE.txt" }
 authors = [{ name = "James Randolph", email = "jarandolph77@gmail.com" }]
 dynamic = ["version"]
-dependencies = ["langchain", "langchain_core", "langchain_community", "langchain_openai", "sentence_transformers"]
+dependencies = ["langchain", "langchain_core", "langchain_community", "langchain_openai", "sentence_transformers", "matplotlib"]
 
 [project.optional-dependencies]
 doc = [

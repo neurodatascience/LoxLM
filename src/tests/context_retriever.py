@@ -1,11 +1,12 @@
-from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from __future__ import annotations
 
-from langchain_milvus.vectorstores import Milvus as m
-
-from utils.bids_split import BidsSplitter
-from utils.pdf_split import PdfSplitter
-from utils.example_loader import ExampleLoader
 import json
+
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_milvus.vectorstores import Milvus as m
+from utils.bids_split import BidsSplitter
+from utils.example_loader import ExampleLoader
+from utils.pdf_split import PdfSplitter
 
 URI = "http://localhost:19530"
 
@@ -43,15 +44,17 @@ context_store = m(
 )
 
 examples_test, _ = ExampleLoader().get_splits()
-inputs = [test['h'] for test in examples_test]
+inputs = [test["h"] for test in examples_test]
 
 
 # Construct Prompt
 print("Retriever")
 retriever = context_store.as_retriever(search_kwargs={"k": 2, "fetch_k": 10})
 
+
 def format_docs(d):
     return str(d)
+
 
 inputs = inputs[:5]
 
@@ -60,7 +63,7 @@ context = [format_docs(retriever.invoke(input)) for input in inputs]
 combined = []
 for inputs, context in zip(inputs, context):
     dic = {}
-    dic['input'], dic['context'] = inputs, context
+    dic["input"], dic["context"] = inputs, context
     combined.append(dic)
-with open("context_results.json",'w') as f:
-    json.dump(combined,f,indent = 4)
+with open("context_results.json", "w") as f:
+    json.dump(combined, f, indent=4)
