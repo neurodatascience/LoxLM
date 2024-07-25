@@ -44,9 +44,21 @@ model = SentenceTransformer(model_name)
 
 model = OpenAIEmbeddings(model="text-embedding-3-small")
 
+weights = {
+    "series_description": 0.6,
+    "protocol_name": 0.6,
+    "task_name": 0.2,
+    "repetition_time": 0.2,
+    "echo_time": 0.2,
+    "inversion_time": 0.2,
+    "pulse_sequence_type": 0.3,
+    "flip_angle": 0.2,
+    "manufacturer": 0.4,
+    "model": 0.2,
+}
 
 # Instantiate Example Selector
-examples_selector = MultiExampleSelector(examples=examples_store, k=20, model=model)
+examples_selector = MultiExampleSelector(examples=examples_store, k=30, model=model)
 
 
 # Load LLM
