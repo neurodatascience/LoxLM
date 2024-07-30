@@ -193,7 +193,7 @@ class MultiExampleSelector(BaseExampleSelector):
     It is used to select the 'k' nearest stored examples to an input query.
     """
 
-    def __init__(self, model, examples: [Example], k: int = None, weights: dict | None = None):
+    def __init__(self, model, examples: [Example], k: int = 3, weights: dict | None = None):
         self.examples = examples
         self.k = k
         self.weights = weights
@@ -218,7 +218,10 @@ class MultiExampleSelector(BaseExampleSelector):
             if example.field is not None and example.field != "NA":
                 field_ranker.add_example(example)
 
-    def select_examples(self, input: Example, k: int = 3):
+    def select_examples(
+        self,
+        input: Example,
+    ):
         """
         Return the k examples with smalled distance to input Example.
 
@@ -255,7 +258,7 @@ class MultiExampleSelector(BaseExampleSelector):
         final_distances = final_distances / num_distances
         example_dist = zip(self.examples, final_distances.tolist())
         sorted_examples = sorted(example_dist, key=lambda x: x[1])
-        test = sorted_examples[:k]
+        test = sorted_examples[: self.k]
         exs = [example[0].model_dump() for example in test]
         return exs
 

@@ -1,13 +1,15 @@
-import json
-from pathlib import Path
+from __future__ import annotations
+
 from langchain_core.prompt_values import PromptValue
+
 
 class PromptLogger:
     """Class to save prompts and write them to a text file.
-    
-        file: str
-            Address of text file to be written.
+
+    file: str
+        Address of text file to be written.
     """
+
     def __init__(self, file: str = "./prompt_logs.txt"):
         self.file = file
         self.prompts = []
@@ -21,14 +23,12 @@ class PromptLogger:
         self.inputs.append(input)
 
     def write_logs(self):
-
         with open(self.file, "w") as f:
-            for prompt, input in zip(self.prompts,self.inputs):
-                string = [f'Input: {input}']
+            for prompt, input in zip(self.prompts, self.inputs):
+                string = [f"Input: {input}"]
                 string.append("Prompt:")
                 for line in prompt:
                     string.append(line)
                 for s in string:
                     f.write(s)
                     f.write("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
