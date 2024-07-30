@@ -193,14 +193,10 @@ class MultiExampleSelector(BaseExampleSelector):
     It is used to select the 'k' nearest stored examples to an input query.
     """
 
-    def __init__(
-        self,
-        model,
-        examples: [Example],
-        k: int = None,
-    ):
+    def __init__(self, model, examples: [Example], k: int = 3, weights: dict | None = None):
         self.examples = examples
         self.k = k
+        self.weights = weights
         if examples is not None and len(examples) > 0:
             self.fields = examples[0].__fields__
             self.field_rankers = {}
@@ -222,7 +218,10 @@ class MultiExampleSelector(BaseExampleSelector):
             if example.field is not None and example.field != "NA":
                 field_ranker.add_example(example)
 
-    def select_examples(self, input: Example, weights: dict | None = None, k: int = 3):
+    def select_examples(
+        self,
+        input: Example,
+    ):
         """
         Return the k examples with smalled distance to input Example.
 
@@ -250,8 +249,8 @@ class MultiExampleSelector(BaseExampleSelector):
             if value is not None and value != "NA" and field != "suffix":
                 field_ranker = self.field_rankers[field]
                 distances = field_ranker.eval_distance(value)
-                if weights is not None and weights[field] is not None:
-                    distances = distances * weights[field]
+                if self.weights is not None and self.weights[field] is not None:
+                    distances = distances * self.weights[field]
                 dist = np.vstack([dist, distances])
         # self.plot(dist)
         num_distances = np.sum(~np.isnan(dist), axis=0)
@@ -259,7 +258,7 @@ class MultiExampleSelector(BaseExampleSelector):
         final_distances = final_distances / num_distances
         example_dist = zip(self.examples, final_distances.tolist())
         sorted_examples = sorted(example_dist, key=lambda x: x[1])
-        test = sorted_examples[:k]
+        test = sorted_examples[: self.k]
         exs = [example[0].model_dump() for example in test]
         return exs
 

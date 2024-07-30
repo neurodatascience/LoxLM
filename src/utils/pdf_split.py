@@ -1,20 +1,30 @@
+from __future__ import annotations
+
 import os
+
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+
 class PdfSplitter:
     """
-    Crawls through all pdf documents in pdf folder. 
-        Splits them in to chunks. Returns splits through 
+    Crawls through all pdf documents in pdf folder.
+
+        Splits them in to chunks. Returns splits through
         get splits function.
-        """
-    def __init__(self,
-                 src = "./pdfs",
-                 chunk_size = 300,
-                 chunk_overlap = 15,):
+    """
+
+    def __init__(
+        self,
+        src="./pdfs",
+        chunk_size=300,
+        chunk_overlap=15,
+    ):
         self.src = src
         pdf_splits = self.crawl_pdfs(src)
-        self.text_splitter = RecursiveCharacterTextSplitter(chunk_size = chunk_size, chunk_overlap = chunk_overlap)
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size, chunk_overlap=chunk_overlap
+        )
         self.splits = self.text_splitter.split_documents(pdf_splits)
 
     def crawl_pdfs(self, src):

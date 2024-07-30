@@ -217,7 +217,6 @@ def rag_chain(example):
     string = dict_to_string(args)
     context = retriever.invoke(string)
     args["context"] = context
-    print(context)
     # creates prompt from input arguments
     prompt = final_prompt.invoke(args)
     # Stores the resulting prompt
@@ -235,7 +234,7 @@ def rag_chain(example):
 # prompt logger writes saved prompts into a text file
 
 # Takes subset of test examples
-examples_test = examples_test[:100]
+# examples_test = examples_test[:100]
 # Dumps dictionary from the Example Pydantic Objects
 examples = [example.model_dump() for example in examples_test]
 # Removes and stores the ground truth suffix value

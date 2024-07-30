@@ -84,6 +84,18 @@ example_prompt_no_suffix = ChatPromptTemplate.from_messages(
 few_shot_prompt = FewShotChatMessagePromptTemplate(
     example_selector=examples_selector,
     example_prompt=example_prompt,
+    input_variables=[
+        "series_description",
+        "protocol_name",
+        "task_name",
+        "repetition_time",
+        "echo_time",
+        "inversion_time",
+        "pulse_sequence_type",
+        "flip_angle",
+        "manufacturer",
+        "model",
+    ],
 )
 
 # Creates pydantic output parser with template object being an Example

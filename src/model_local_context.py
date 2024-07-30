@@ -4,6 +4,7 @@ import json
 
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_community.llms import Ollama
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts.chat import ChatPromptTemplate
@@ -28,14 +29,14 @@ examples_test, examples_store = el.get_splits(randomize=True)
 
 
 # Create embedding model
-""" model_name = "BAAI/bge-small-en"
-model_kwargs = {'device': 'cuda'}
-encode_kwargs = {'normalize_embeddings': True}
+model_name = "BAAI/bge-small-en"
+model_kwargs = {"device": "cuda"}
+encode_kwargs = {"normalize_embeddings": True}
 model = SentenceTransformer(model_name)
 
 hf = HuggingFaceBgeEmbeddings(
-       model_name=model_name, model_kwargs=model_kwargs, encode_kwargs=encode_kwargs
-) """
+    model_name=model_name, model_kwargs=model_kwargs, encode_kwargs=encode_kwargs
+)
 model = SentenceTransformer("sentence-transformers/distiluse-base-multilingual-cased-v2")
 
 # Instantiate Example Selector
@@ -73,13 +74,13 @@ print("Model Loaded")
 # Context
 print("Context Store")
 context_store = m(
-    embedding_function=model,
+    embedding_function=hf,
     connection_args=connection_args,
     collection_name=CONTEXT_COLLECTION,
     drop_old=True,
 ).from_documents(
     all_context,
-    embedding=model,
+    embedding=hf,
     collection_name=CONTEXT_COLLECTION,
     connection_args=connection_args,
 )
@@ -120,6 +121,18 @@ example_prompt_no_suffix = ChatPromptTemplate.from_messages(
 few_shot_prompt = FewShotChatMessagePromptTemplate(
     example_selector=examples_selector,
     example_prompt=example_prompt,
+    input_variables=[
+        "series_description",
+        "protocol_name",
+        "task_name",
+        "repetition_time",
+        "echo_time",
+        "inversion_time",
+        "pulse_sequence_type",
+        "flip_angle",
+        "manufacturer",
+        "model",
+    ],
 )
 
 # Creates pydantic output parser with template object being an Example
