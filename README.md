@@ -9,6 +9,8 @@ in the directory 'pip install .'
 ## Usage
 
 LoxLM can be used as an api. Look at example_loxlm.py for a basic testing usage script.
+Import the package as '''from loxlm import LoxLM'''
+You can create a LoxLM object and then invoke input using the input_batch method.
 
 ### Local
 
