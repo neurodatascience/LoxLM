@@ -65,29 +65,29 @@ class LoxLM:
             context: bool = False,
             openai: bool = True,
         ):
-            """
-            Object to process dicoms to generate bids suffixes.
+        """
+        Object to process dicoms to generate bids suffixes.
 
-            Parameters:
-            input_dicoms: str | None - String of address of dicom dataset to ingest.
-            Does not need to be inputted here. Can also be inputted using batch_input method.
+        Parameters:
+        input_dicoms: str | None - String of address of dicom dataset to ingest.
+        Does not need to be inputted here. Can also be inputted using batch_input method.
 
-            test: bool - Whether or not to run a test instance. This splits the examples dataset
-            to test on a portion of these and using the rest for the examples store.
+        test: bool - Whether or not to run a test instance. This splits the examples dataset
+        to test on a portion of these and using the rest for the examples store.
 
-            output_file: str - The address where the output json will be written
+        output_file: str - The address where the output json will be written
 
-            log_promtps: bool - Whether or not to print a text file of all prompts sent generated.
-            Useful for testing.
+        log_promtps: bool - Whether or not to print a text file of all prompts sent generated.
+        Useful for testing.
 
-            context: bool - Whether or not to create a context store from bids specification. If this
-            is set to True make sure to spin up Milvus docker containers using 'docker compose up -d'.
-            It is recommended to not use this.
+        context: bool - Whether or not to create a context store from bids specification. If this
+        is set to True make sure to spin up Milvus docker containers using 'docker compose up -d'.
+        It is recommended to not use this.
 
-            openai: bool - Whether or not to use openai models. If False local models will be used. This assumes
-            that an ollama instance is running locally with a specified model pulled. It is recommended to use
-            openai by default. The default openai model is 'gpt-4o'
-            """
+        openai: bool - Whether or not to use openai models. If False local models will be used. This assumes
+        that an ollama instance is running locally with a specified model pulled. It is recommended to use
+        openai by default. The default openai model is 'gpt-4o'
+        """
         self.context = context
         self.output_file = output_file
         if input_dicoms and test:
